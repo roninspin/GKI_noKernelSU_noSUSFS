@@ -40,6 +40,7 @@ on:
           - KSUN+BBG
           - KSUN+NET
           - KSUN+DS
+          - BBG+NET+DS
           - KSUN
           - NONE
           - FULL
