@@ -185,6 +185,9 @@ jobs:
         kernel_version: ${{ inputs.kernel_version }}
         sublevel: ${{ steps.extract.outputs.sublevel }}
 
+    - name: Integrate Tango32 Kernel Module
+      uses: ./.github/actions/tango32
+
     - name: Apply Ptrace Patch
       uses: ./.github/actions/ptrace
       with:
