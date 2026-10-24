@@ -102,6 +102,10 @@ on:
         description: "NTSync"
         type: boolean
         default: true
+      use_tango:
+        description: "Tango32"
+        type: boolean
+        default: true
       use_ptrace:
         description: "Ptrace Patch"
         type: boolean
@@ -635,12 +639,12 @@ jobs:
           # which is opt-in on dispatch and stays off for nightlies.
           if [ "${{ github.event_name }}" = "schedule" ]; then
             F_SUSFS=true;  F_NOMOUNT=true; F_BBG=true;  F_NET=true
-            F_DS=true;     F_NTSYNC=true;  F_PTRACE=true; F_UNICODE=true
-            F_BPF=true;    F_PERF=false
+            F_DS=true;     F_NTSYNC=true; F_TANGO=true;  F_PTRACE=true
+            F_UNICODE=true; F_BPF=true;    F_PERF=false
           else
             F_SUSFS="${{ inputs.use_susfs }}";   F_NOMOUNT="${{ inputs.use_nomount }}"
             F_BBG="${{ inputs.use_bbg }}";        F_NET="${{ inputs.use_net }}"
-            F_DS="${{ inputs.use_ds }}";          F_NTSYNC="${{ inputs.use_ntsync }}"
+            F_DS="${{ inputs.use_ds }}";          F_NTSYNC="${{ inputs.use_ntsync }}"  F_TANGO="${{ inputs.use_tango }}";
             F_PTRACE="${{ inputs.use_ptrace }}";  F_UNICODE="${{ inputs.use_unicode }}"
             F_BPF="${{ inputs.use_bpf }}";        F_PERF="${{ inputs.use_perf }}"
           fi
@@ -652,6 +656,7 @@ jobs:
           [ "$F_NET" = "true" ] && FEATURES="${FEATURES}NET+"
           [ "$F_DS" = "true" ] && FEATURES="${FEATURES}DS+"
           [ "$F_NTSYNC" = "true" ] && FEATURES="${FEATURES}NTSync+"
+          [ "$F_TANGO" = "true" ] && FEATURES="${FEATURES}Tango32+"
           [ "$F_PTRACE" = "true" ] && FEATURES="${FEATURES}Ptrace+"
           [ "$F_UNICODE" = "true" ] && FEATURES="${FEATURES}Unicode+"
           [ "$F_BPF" = "true" ] && FEATURES="${FEATURES}BPF+"
@@ -2050,6 +2055,7 @@ jobs:
           USE_DS: ${{ inputs.use_ds || (github.event_name == 'schedule' && true) || false }}
           USE_NET: ${{ inputs.use_net || (github.event_name == 'schedule' && true) || false }}
           USE_NTSYNC: ${{ inputs.use_ntsync || (github.event_name == 'schedule' && true) || false }}
+          USE_TANGO: ${{ inputs.use_tango || (github.event_name == 'schedule' && true) || false }}
           USE_PTRACE: ${{ inputs.use_ptrace || (github.event_name == 'schedule' && true) || false }}
           USE_UNICODE: ${{ inputs.use_unicode || (github.event_name == 'schedule' && true) || false }}
           USE_BPF: ${{ inputs.use_bpf || (github.event_name == 'schedule' && true) || false }}
@@ -2106,6 +2112,7 @@ jobs:
           if env("USE_DS","true")=="true": feats.append("DroidSpaces-OSS")
           if env("USE_NET","true")=="true": feats.append("Networking")
           if env("USE_NTSYNC","true")=="true": feats.append("NTSync")
+          if env("USE_TANGO","true")=="true": feats.append("Tango32")
           if env("USE_PTRACE","true")=="true": feats.append("Ptrace Leak Fix")
           if env("USE_UNICODE","true")=="true": feats.append("Unicode Fix")
           if env("USE_BPF","true")=="true": feats.append("BTF / eBPF / FUSE-BPF")
