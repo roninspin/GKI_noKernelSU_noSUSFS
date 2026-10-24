@@ -1,0 +1,36 @@
+# .github/actions/tango32/action.yml
+name: 'Integrate Tango32 Kernel Module'
+description: 'Clones the Tango32 module, patches kernel build files, and enables CONFIG_TANGO32'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Clone and Integrate Tango32 Module
+      shell: bash
+      working-directory: ${{ github.workspace }}/kernel/common
+      run: |
+        set -euo pipefail
+
+        # 1. Clone the module (using the fork with SM8750 fixes)
+        TANGO_REPO="https://github.com/spiral009/tango32-module.git"
+        TANGO_DIR="drivers/tango32-module"
+        git clone --depth 1 "${TANGO_REPO}" "${TANGO_DIR}"
+
+        # 2. Patch drivers/Kconfig to include the module's Kconfig
+        # We add the source line before the final 'endmenu'
+        if ! grep -q "tango32-module/Kconfig" drivers/Kconfig; then
+          # Insert before the last 'endmenu' line
+          awk 'NR==FNR{lines[NR]=$0; next} /^endmenu$/{print "source \"drivers/tango32-module/Kconfig\""} {print}' drivers/Kconfig > drivers/Kconfig.new
+          mv drivers/Kconfig.new drivers/Kconfig
+        fi
+
+        # 3. Patch drivers/Makefile to build the module
+        if ! grep -q "tango32-module" drivers/Makefile; then
+          echo "obj-\$(CONFIG_TANGO32) += tango32-module/" >> drivers/Makefile
+        fi
+
+    - name: Enable TANGO32
+      uses: ./.github/actions/set-kernel-config
+      with:
+        config_list: |
+          CONFIG_TANGO32=y
